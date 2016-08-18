@@ -6,6 +6,9 @@ package object scalashop {
   /** The value of every pixel is represented as a 32 bit integer. */
   type RGBA = Int
 
+  type Pixel = (Int,Int,Int,Int)
+  type Point = (Int,Int)
+
   /** Returns the red component. */
   def red(c: RGBA): Int = (0xff000000 & c) >>> 24
 
@@ -39,8 +42,16 @@ package object scalashop {
 
   /** Computes the blurred RGBA value of a single pixel of the input image. */
   def boxBlurKernel(src: Img, x: Int, y: Int, radius: Int): RGBA = {
-    // TODO implement using while loops
-    ???
+    def accumulate (acc:Pixel,point:Point):Pixel =
+      (acc._1 + red(src(point._1,point._2)),acc._2 + green(src(point._1,point._2)),acc._3 + blue(src(point._1,point._2)),acc._4 + alpha(src(point._1,point._2)))
+
+    val points:Seq[Point] = for {
+      px <-  Range(x-radius,x+radius+1)
+      py <- Range(y-radius,y+radius+1)
+    } yield (clamp(px,0,src.width),clamp(py,0,src.height))
+
+    val avg:Pixel = points.foldLeft((0,0,0,0)) (accumulate)
+    rgba(avg._1/points.length,avg._2/points.length,avg._3/points.length,avg._4/points.length)
   }
 
 }
