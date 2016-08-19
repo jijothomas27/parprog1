@@ -44,14 +44,13 @@ package object scalashop {
   def boxBlurKernel(src: Img, x: Int, y: Int, radius: Int): RGBA = {
     def accumulate (acc:Pixel,point:Point):Pixel =
       (acc._1 + red(src(point._1,point._2)),acc._2 + green(src(point._1,point._2)),acc._3 + blue(src(point._1,point._2)),acc._4 + alpha(src(point._1,point._2)))
-
-    val points:Seq[Point] = for {
+    val points:Set[Point] = (for {
       px <-  Range(x-radius,x+radius+1)
       py <- Range(y-radius,y+radius+1)
-    } yield (clamp(px,0,src.width),clamp(py,0,src.height))
+    } yield (clamp(px,0,src.width-1),clamp(py,0,src.height-1))).toSet
 
     val avg:Pixel = points.foldLeft((0,0,0,0)) (accumulate)
-    rgba(avg._1/points.length,avg._2/points.length,avg._3/points.length,avg._4/points.length)
+    rgba(avg._1/points.size,avg._2/points.size,avg._3/points.size,avg._4/points.size)
   }
 
 }
